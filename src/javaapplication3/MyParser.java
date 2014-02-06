@@ -8,13 +8,15 @@ package javaapplication3;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -72,6 +74,7 @@ public class MyParser {
 
     public void createExcel() throws FileNotFoundException, IOException {
         Workbook wb = new HSSFWorkbook();
+        Sheet sheet1 = wb.createSheet("Contacts");
         FileOutputStream fileOut = new FileOutputStream("workbook.xls");
         wb.write(fileOut);
         fileOut.close();
@@ -79,8 +82,33 @@ public class MyParser {
 
     public static void main(String[] args) {
         MyParser myP = new MyParser("http://www.nsaconstruction.com/contact.html");
-
+        int count = 0;
         System.out.println(myP.getStr());
+
+        Workbook wb = new HSSFWorkbook();
+        Sheet sheet1 = wb.createSheet("Contacts");
+        try (FileOutputStream fileOut = new FileOutputStream("workbook.xls")) {
+            wb.write(fileOut);
+            
+            // Create a cell and put a value in it.
+            if (myP.getPhoneNumbers() != null) {
+                for (String s : myP.getPhoneNumbers()) {
+Row row = sheet1.createRow((short) count);
+                    Cell cell = row.createCell(count);
+                    cell.setCellValue(s);
+                    count++;
+                    System.out.println(s);
+                }
+            }
+
+            fileOut.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
 
         if (myP.getPhoneNumbers() != null) {
             for (String s : myP.getPhoneNumbers()) {
@@ -91,5 +119,4 @@ public class MyParser {
 
         System.out.println("\nNo Phone Numbers Found!");
     }
-
 }
